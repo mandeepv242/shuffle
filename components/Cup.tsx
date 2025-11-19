@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface CupProps {
@@ -47,9 +46,6 @@ export const Cup: React.FC<CupProps> = ({
         >
            {/* Decorative Stripe */}
            <div className="w-full h-4 bg-white/20 absolute top-8"></div>
-           
-           {/* ID for debugging (optional, maybe hide in production or keep for style) */}
-           <span className="text-red-900/30 font-black text-4xl select-none">{id + 1}</span>
         </div>
         
         {/* Reflection */}
