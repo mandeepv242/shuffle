@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface BallProps {
@@ -7,20 +6,25 @@ interface BallProps {
 }
 
 export const Ball: React.FC<BallProps> = ({ positionIndex, isHidden }) => {
-  const leftPositions = ['15%', '50%', '85%'];
+  const leftPositions = ['20%', '50%', '80%'];
+  const TILT_COMPENSATION = 'rotateX(-15deg)';
 
   return (
     <div
-      className="absolute top-1/2 w-10 h-10 sm:w-12 sm:h-12 -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-in-out z-10 pointer-events-none"
+      className="absolute top-1/2 w-10 h-10 sm:w-12 sm:h-12 transition-all duration-200 ease-linear z-10 pointer-events-none"
       style={{
         left: leftPositions[positionIndex],
-        marginTop: '2rem',
-        opacity: isHidden ? 0 : 1
+        transform: `translate(-50%, -50%) ${TILT_COMPENSATION}`,
+        opacity: isHidden ? 0 : 1,
       }}
     >
-        <div className="w-full h-full rounded-full bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700 shadow-[inset_-4px_-4px_10px_rgba(0,0,0,0.5),0_4px_8px_rgba(0,0,0,0.4)]">
+        {/* Ball Shadow */}
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-black/60 rounded-[100%] blur-sm"></div>
+
+        {/* Ball Body */}
+        <div className="relative w-full h-full rounded-full bg-gradient-to-t from-yellow-600 via-yellow-400 to-yellow-200 shadow-[inset_-5px_-5px_15px_rgba(0,0,0,0.4),0_0_10px_rgba(255,200,0,0.3)]">
             {/* Highlight */}
-            <div className="absolute top-2 left-2 w-3 h-3 bg-white/60 rounded-full blur-[1px]"></div>
+            <div className="absolute top-2 left-3 w-4 h-3 bg-white/80 rounded-[100%] blur-[2px] transform -rotate-45"></div>
         </div>
     </div>
   );

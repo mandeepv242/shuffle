@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Cup } from './components/Cup';
 import { Ball } from './components/Ball';
@@ -248,7 +247,7 @@ const App: React.FC = () => {
   const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-slate-800 to-slate-900 flex relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[radial-gradient(circle_at_50%_30%,#1e293b_0%,#0f172a_50%,#000000_100%)] flex relative overflow-hidden font-sans">
       
       {/* Left Sidebar: Leaderboard */}
       <Leaderboard entries={leaderboard} currentPlayer={playerName} />
@@ -291,9 +290,9 @@ const App: React.FC = () => {
 
         {/* Game Table / Summary View */}
         {gameState === GameState.SUMMARY ? (
-           <div className="relative w-full max-w-md p-8 bg-slate-900/90 border border-yellow-500/30 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col items-center z-40 animate-in zoom-in duration-300">
+           <div className="relative w-full max-w-md p-8 bg-slate-900/90 border border-yellow-500/30 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col items-center z-50 animate-in zoom-in duration-300">
                <div className="absolute -top-10">
-                  <div className="text-6xl">🏆</div>
+                  <div className="text-6xl filter drop-shadow-lg">🏆</div>
                </div>
                <h2 className="text-3xl font-black text-white mt-6 mb-2">SESSION COMPLETE</h2>
                <p className="text-slate-400 mb-8 text-center">Great hustle, {playerName}! Here is your performance report.</p>
@@ -324,55 +323,67 @@ const App: React.FC = () => {
                </button>
            </div>
         ) : (
-           /* Main Game Table */
-           <div className="relative w-full max-w-4xl h-[400px] flex items-center justify-center perspective-container">
-             <div className="absolute bottom-10 w-[90%] h-[200px] bg-emerald-900/20 rounded-[50%] blur-3xl -z-10 pointer-events-none"></div>
-             <Ball positionIndex={ballVisualPosition} isHidden={gameState === GameState.SHUFFLING} />
-             {cups.map((cup) => (
-               <Cup
-                 key={cup.id}
-                 id={cup.id}
-                 positionIndex={cupPositions[cup.id]}
-                 isRaised={getCupRaisedState(cup.id)}
-                 onClick={() => handleCupClick(cup.id)}
-                 disabled={gameState !== GameState.GUESSING}
-                 showHighlight={gameState === GameState.REVEALED && cup.id === winningCupId}
-               />
-             ))}
+           /* 3D STAGE CONTAINER */
+           <div className="relative w-full max-w-4xl h-[500px] flex items-center justify-center perspective-[1200px] group">
+             
+             {/* TABLE PLANE (Tilted) */}
+             <div 
+                className="relative w-full h-full"
+                style={{ transformStyle: 'preserve-3d', transform: 'rotateX(15deg)' }}
+             >
+                 {/* Table Surface Texture (Lightweight) */}
+                 <div className="absolute inset-x-0 bottom-[20%] h-[300px] bg-white/5 rounded-[100%] blur-3xl -z-10 pointer-events-none"></div>
+
+                 {/* BALL (Rendered first to be behind/under cups in DOM order if same Z, but we handle with Z-index too) */}
+                 <Ball positionIndex={ballVisualPosition} isHidden={gameState === GameState.SHUFFLING} />
+                 
+                 {/* CUPS */}
+                 {cups.map((cup) => (
+                   <Cup
+                     key={cup.id}
+                     id={cup.id}
+                     positionIndex={cupPositions[cup.id]}
+                     isRaised={getCupRaisedState(cup.id)}
+                     onClick={() => handleCupClick(cup.id)}
+                     disabled={gameState !== GameState.GUESSING}
+                     showHighlight={gameState === GameState.REVEALED && cup.id === winningCupId}
+                   />
+                 ))}
+             </div>
            </div>
         )}
 
         {/* Controls */}
-        <div className="z-30 mt-8 h-20 flex items-center justify-center">
+        <div className="z-30 mt-4 h-20 flex items-center justify-center">
            {gameState === GameState.IDLE && !showNameModal && (
              <div className="text-slate-400 animate-pulse">Waiting for player...</div>
            )}
 
            {gameState === GameState.REVEALED && (
-              <div className="flex flex-col items-center gap-2">
-                 <div className="text-2xl font-bold mb-2 animate-bounce">
+              <div className="flex flex-col items-center gap-2 animate-in slide-in-from-bottom-4 duration-300">
+                 <div className="text-2xl font-bold mb-2">
                    {lastGuessedCupId === winningCupId ? 
-                     <span className="text-green-400 drop-shadow-md">Correct! 🎉</span> : 
-                     <span className="text-red-400 drop-shadow-md">Missed it! ❌</span>
+                     <span className="text-green-400 drop-shadow-md flex items-center gap-2">✅ Correct!</span> : 
+                     <span className="text-red-400 drop-shadow-md flex items-center gap-2">❌ Missed it!</span>
                    }
                  </div>
                  <button 
                    onClick={handleNextAction}
-                   className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-full font-bold text-white transition-all shadow-lg hover:scale-105"
+                   className="px-10 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-full font-black text-white transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105 uppercase tracking-wide text-sm"
                  >
-                   {roundsPlayed >= TOTAL_GAME_ROUNDS ? "SEE RESULTS" : "NEXT ROUND ->"}
+                   {roundsPlayed >= TOTAL_GAME_ROUNDS ? "See Results" : "Next Round"}
                  </button>
               </div>
            )}
 
            {gameState === GameState.SHUFFLING && (
-              <div className="text-slate-400 font-mono text-sm animate-pulse">
-                 Shuffling... Keep your eyes open!
+              <div className="text-cyan-400 font-bold text-lg tracking-[0.2em] animate-pulse uppercase">
+                 Shuffling...
               </div>
            )}
            
            {gameState === GameState.GUESSING && (
-              <div className="text-yellow-400 font-bold text-xl animate-pulse drop-shadow-lg">
+              <div className="text-yellow-400 font-black text-2xl animate-bounce drop-shadow-lg uppercase tracking-widest">
                  Pick a Cup!
               </div>
            )}
@@ -382,8 +393,8 @@ const App: React.FC = () => {
         <Host message={hostMessage} isLoading={isHostThinking} />
         
         {/* Footer */}
-        <div className="absolute bottom-2 text-slate-600 text-xs text-center w-full">
-           Powered by Google Gemini • Pure CSS Animations
+        <div className="absolute bottom-2 text-slate-600 text-[10px] text-center w-full tracking-widest uppercase opacity-50">
+           Powered by Google Gemini • 3D CSS Engine
         </div>
       </div>
 
