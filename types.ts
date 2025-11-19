@@ -1,3 +1,4 @@
+
 export enum GameState {
   IDLE = 'IDLE',           // Before start, showing "Start Game"
   REVEALING_START = 'REVEALING_START', // Showing where the ball is initially
@@ -5,6 +6,7 @@ export enum GameState {
   SHUFFLING = 'SHUFFLING', // Cups moving
   GUESSING = 'GUESSING',   // Waiting for user input
   REVEALED = 'REVEALED',   // Show result
+  SUMMARY = 'SUMMARY',     // Show 10-round session results
   WIN = 'WIN',
   LOSE = 'LOSE'
 }
@@ -20,4 +22,10 @@ export interface CommentaryResponse {
 export interface GameStats {
   wins: number;
   total: number;
+}
+
+export interface LeaderboardEntry {
+  name: string;
+  score: number; // Max Streak
+  date: number;  // Timestamp
 }
