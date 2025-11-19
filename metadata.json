@@ -1,0 +1,5 @@
+{
+  "name": "Cup Shuffle Master",
+  "description": "A high-stakes, animated 'Guess the Cup' game featuring an AI commentator powered by Gemini.",
+  "requestFramePermissions": []
+}
