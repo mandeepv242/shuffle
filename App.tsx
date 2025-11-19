@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Cup } from './components/Cup';
 import { Ball } from './components/Ball';
-import { Host } from './components/Host';
 import { Leaderboard } from './components/Leaderboard';
 import { NameModal } from './components/NameModal';
 import { GameState, CupData, LeaderboardEntry } from './types';
 import { SHUFFLE_SPEED_MS, TOTAL_SHUFFLES, TOTAL_GAME_ROUNDS } from './constants';
-import { generateHostCommentary } from './services/geminiService';
 import { playSound } from './services/audioService';
 
 const LEADERBOARD_KEY = 'cup_shuffle_leaderboard_v1';
@@ -24,8 +22,6 @@ const App: React.FC = () => {
   const [stats, setStats] = useState({ wins: 0, total: 0 }); 
   const [roundsPlayed, setRoundsPlayed] = useState<number>(0);
 
-  const [hostMessage, setHostMessage] = useState<string>("Welcome to the table! Step right up and test your eyes!");
-  const [isHostThinking, setIsHostThinking] = useState<boolean>(false);
   const [lastGuessedCupId, setLastGuessedCupId] = useState<number | null>(null);
 
   // Leaderboard & Player State
@@ -92,13 +88,6 @@ const App: React.FC = () => {
     });
   };
 
-  const updateHost = useCallback(async (context: string) => {
-    setIsHostThinking(true);
-    const comment = await generateHostCommentary(context, streak);
-    setHostMessage(comment);
-    setIsHostThinking(false);
-  }, [streak]);
-
   // --- Game Flow ---
 
   const handleNameSubmit = (name: string) => {
@@ -114,8 +103,6 @@ const App: React.FC = () => {
     setSessionBestStreak(0);
     setRoundsPlayed(0);
     
-    updateHost(`Welcome ${name}! You have ${TOTAL_GAME_ROUNDS} rounds to prove yourself. Let's begin!`);
-    
     // Start Round 1 immediately
     setTimeout(() => {
         startRoundLogic(name);
@@ -129,11 +116,6 @@ const App: React.FC = () => {
     setLastGuessedCupId(null);
     setGameState(GameState.REVEALING_START);
     
-    if (!name) {
-       // If generic next round
-       updateHost(`Round ${roundsPlayed + 1} of ${TOTAL_GAME_ROUNDS}. Focus!`);
-    }
-
     timeoutRef.current = setTimeout(() => {
       playSound('reveal');
       setGameState(GameState.COVERING);
@@ -199,13 +181,10 @@ const App: React.FC = () => {
     }));
     setRoundsPlayed(currentRound);
 
-    // Host Commentary
     if (isWin) {
       setTimeout(() => playSound('win'), 100);
-      updateHost(`Correct! ${playerName} is heating up! Streak: ${newStreak}`);
     } else {
       setTimeout(() => playSound('lose'), 100);
-      updateHost(`Ouch! The ball was elsewhere. Streak reset.`);
     }
   };
 
@@ -220,7 +199,6 @@ const App: React.FC = () => {
   const finishSession = () => {
       setGameState(GameState.SUMMARY);
       saveToLeaderboard(playerName, sessionBestStreak);
-      updateHost(`That's a wrap! Let's see how you did, ${playerName}.`);
   };
 
   const handleExitToMenu = () => {
@@ -273,12 +251,23 @@ const App: React.FC = () => {
                   <div className="text-xl font-bold text-white">{roundsPlayed} / {TOTAL_GAME_ROUNDS}</div>
               </div>
               
+              {/* Wins Counter */}
+              <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 px-4 py-2 rounded-xl shadow-xl text-center min-w-[80px]">
+                  <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Wins</div>
+                  <div className={`text-xl font-bold ${stats.wins > 0 ? 'text-emerald-400' : 'text-slate-200'}`}>
+                     {stats.wins}
+                  </div>
+              </div>
+
+              {/* Win % */}
               <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 px-4 py-2 rounded-xl shadow-xl text-center min-w-[80px]">
                   <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Win %</div>
                   <div className={`text-xl font-bold ${stats.wins > 0 ? 'text-blue-400' : 'text-slate-200'}`}>
                      {winRate}%
                   </div>
               </div>
+              
+              {/* Streak */}
               <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 px-4 py-2 rounded-xl shadow-xl text-center min-w-[80px]">
                   <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Streak</div>
                   <div className={`text-xl font-bold ${streak > 0 ? 'text-green-400' : 'text-slate-200'}`}>
@@ -389,12 +378,9 @@ const App: React.FC = () => {
            )}
         </div>
 
-        {/* AI Host */}
-        <Host message={hostMessage} isLoading={isHostThinking} />
-        
         {/* Footer */}
         <div className="absolute bottom-2 text-slate-600 text-[10px] text-center w-full tracking-widest uppercase opacity-50">
-           Powered by Google Gemini • 3D CSS Engine
+           3D CSS Engine
         </div>
       </div>
 
